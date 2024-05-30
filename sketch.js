@@ -7,6 +7,8 @@ class MultiCircle {
     this.layerNum = layerNum;
     this.innerRadius = maxRadius / 2;
     this.dotRadius = 5;
+    this.z = random(width); // Depth value
+    this.pz = this.z;
     this.innerAllowedColors = [
       color(87, 98, 100),
       color(180, 172, 153),
@@ -40,42 +42,53 @@ class MultiCircle {
     return colors;
   }
 
+  update(speed) {
+    this.z -= speed;
+    if (this.z < 1) {
+      this.z = width;
+      this.x = random(-width, width);
+      this.y = random(-height, height);
+      this.pz = this.z;
+    }
+  }
+
   display() {
-    let outerRadius = this.innerRadius + this.layerNum * this.dotRadius * 2;
+    let sx = map(this.x / this.z, 0, 1, 0, width);
+    let sy = map(this.y / this.z, 0, 1, 0, height);
+    let radius = map(this.z, 0, width, this.maxRadius, 0);
 
     fill(231, 231, 224);
     noStroke();
-    ellipse(this.x, this.y, outerRadius * 2);
+    ellipse(sx, sy, radius * 2);
 
     noFill();
     for (let i = this.innerColors.length - 1; i >= 0; i--) {
       stroke(this.innerColors[i]);
       strokeWeight(5);
-      ellipse(this.x, this.y, this.innerRadius * (i + 1) / this.innerColors.length * 2);
+      ellipse(sx, sy, (radius * (i + 1) / this.innerColors.length) * 2);
     }
 
     fill(this.outerColor);
     noStroke();
     for (let i = 0; i < 360; i += 30) {
       let angle = radians(i);
-      let radius = this.innerRadius + (this.layerNum - 1) * this.dotRadius * 2;
-      let x = this.x + cos(angle) * radius;
-      let y = this.y + sin(angle) * radius;
+      let r = radius + (this.layerNum - 1) * this.dotRadius * 2;
+      let x = sx + cos(angle) * r;
+      let y = sy + sin(angle) * r;
       ellipse(x, y, this.dotRadius * 2);
     }
 
-    // Draw clock at the center of the circle
     let hour = this.hour % 12;
     let minute = this.minute;
     let second = this.second;
-    drawClock(this.x, this.y, hour, minute, second);
+    drawClock(sx, sy, hour, minute, second);
   }
 }
 
 function drawClock(x, y, hour, minute, second) {
-  let hourRadius = 30; // Length of hour hand
-  let minuteRadius = 40; // Length of minute hand
-  let secondRadius = 45; // Length of second hand
+  let hourRadius = 30;
+  let minuteRadius = 40;
+  let secondRadius = 45;
 
   let hourAngle = TWO_PI * ((hour % 12) / 12) - HALF_PI;
   let minuteAngle = TWO_PI * (minute / 60) - HALF_PI;
@@ -94,29 +107,81 @@ function drawClock(x, y, hour, minute, second) {
   line(x, y, x + cos(secondAngle) * secondRadius, y + sin(secondAngle) * secondRadius);
 }
 
+class Dot {
+  constructor(x, y, z) {
+    this.x = x;
+    this.y = y;
+    this.z = z;
+    this.pz = this.z;
+  }
+
+  update(speed) {
+    this.z -= speed;
+    if (this.z < 1) {
+      this.z = width;
+      this.x = random(-width, width);
+      this.y = random(-height, height);
+      this.pz = this.z;
+    }
+  }
+
+  display() {
+    fill(231, 231, 224);
+    noStroke();
+
+    let sx = map(this.x / this.z, 0, 1, 0, width);
+    let sy = map(this.y / this.z, 0, 1, 0, height);
+    let r = map(this.z, 0, width, dotSize, 0);
+    ellipse(sx, sy, r, r);
+
+    let px = map(this.x / this.pz, 0, 1, 0, width);
+    let py = map(this.y / this.pz, 0, 1, 0, height);
+
+    this.pz = this.z;
+
+    stroke(193, 110, 74);
+    line(px, py, sx, sy);
+  }
+}
 
 let multiCircles = [];
+let dots = [];
 let innerMultiCircleNum = 10;
 let layerNum = 5;
-let dotSize = 10;
-let dotDensity = 30;
+let dotSize = 15;
+let dotDensity = 3;
+let speed = 7; // Initial speed
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
 
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 20; i++) {
     let x = random(width);
     let y = random(height);
     let maxRadius = random(50, 200);
     multiCircles.push(new MultiCircle(x, y, maxRadius, innerMultiCircleNum, layerNum));
   }
+
+  for (let i = 0; i < 100; i++) {
+    let x = random(-width, width);
+    let y = random(-height, height);
+    let z = random(width);
+    dots.push(new Dot(x, y, z));
+  }
 }
 
 function draw() {
-  background(255);
-  drawPolkaDotBackground();
+  background(0);
+  
+  speed = map(mouseX, 0, width, 1, 20); // Adjust speed based on mouseX position
+  
+  for (let dot of dots) {
+    dot.update(speed);
+    dot.display();
+  }
   
   for (let mc of multiCircles) {
+    mc.update(speed);
     mc.display();
   }
   
@@ -125,16 +190,6 @@ function draw() {
     mc.hour = hour();
     mc.minute = minute();
     mc.second = second();
-  }
-}
-
-function drawPolkaDotBackground() {
-  fill(231, 231, 224);
-  noStroke();
-  for (let y = 0; y < height; y += dotDensity) {
-    for (let x = 0; x < width; x += dotDensity) {
-      ellipse(x, y, dotSize);
-    }
   }
 }
 
