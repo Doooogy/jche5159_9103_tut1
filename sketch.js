@@ -351,7 +351,7 @@ function draw() {
     textSize(32); // Set text size
     text("Stage 1", 10, 40); // Draw stage text
     textSize(16); // Set text size
-    text("Young people always believe they are in control of the world.", 10, 70); // Draw description text
+    text("Young people always believe they are in control of the world: Move Mouse", 10, 70); // Draw description text
   
     for (let dot of dots) {
       dot.update(speed); // Update dot
@@ -369,7 +369,7 @@ function draw() {
     textSize(32); // Set text size
     text("Stage 2", 10, 40); // Draw stage text
     textSize(16); // Set text size
-    text("However, as time goes by, the world decays.", 10, 70); // Draw description text
+    text("However, as time goes by, the world decays: Press Mouse", 10, 70); // Draw description text
 
     // Static MultiCircles
     for (let mc of multiCircles) {
