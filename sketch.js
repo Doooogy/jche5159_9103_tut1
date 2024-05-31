@@ -31,6 +31,7 @@ class MultiCircle {
     this.innerColors = this.generateRandomColors(innerMultiCircleNum, this.innerAllowedColors);
     this.outerColor = this.generateRandomColors(1, this.outerAllowedColors)[0];
     this.updateTime();
+    this.splashes = [];
   }
 
   generateRandomColors(num, allowedColors = []) {
@@ -85,12 +86,36 @@ class MultiCircle {
     let minute = this.minute;
     let second = this.second;
     drawClock(sx, sy, hour, minute, second);
+
+    // Display splashes
+    for (let splash of this.splashes) {
+      splash.update();
+      splash.show();
+    }
   }
 
   updateTime() {
     this.hour = hour();
     this.minute = minute();
     this.second = second();
+  }
+
+  marble(drop) {
+    let d = dist(this.x, this.y, drop.x, drop.y);
+    if (d < this.maxRadius + drop.radius) {
+      let angle = atan2(drop.y - this.y, drop.x - this.x);
+      let targetX = this.x + cos(angle) * (this.maxRadius + drop.radius);
+      let targetY = this.y + sin(angle) * (this.maxRadius + drop.radius);
+      let ax = (targetX - drop.x) * 0.05;
+      let ay = (targetY - drop.y) * 0.05;
+      this.splashes.push(new Splash(this.x, this.y, ax, ay, this.outerColor));
+      return true; // Indicate that the drop hit the MultiCircle
+    }
+    return false;
+  }
+
+  tine(v, x, y, z, c) {
+    this.splashes.push(new Splash(x, y, v.x * z, v.y * z, c));
   }
 }
 
@@ -124,6 +149,7 @@ class Dot {
     this.y = y;
     this.z = z;
     this.pz = this.z;
+    this.splashes = [];
   }
 
   update(speed) {
@@ -152,22 +178,91 @@ class Dot {
 
     stroke(193, 110, 74);
     line(px, py, sx, sy);
+
+    // Display splashes
+    for (let splash of this.splashes) {
+      splash.update();
+      splash.show();
+    }
+  }
+
+  marble(drop) {
+    let d = dist(this.x, this.y, drop.x, drop.y);
+    if (d < dotSize + drop.radius) {
+      let angle = atan2(drop.y - this.y, drop.x - this.x);
+      let targetX = this.x + cos(angle) * (dotSize + drop.radius);
+      let targetY = this.y + sin(angle) * (dotSize + drop.radius);
+      let ax = (targetX - drop.x) * 0.05;
+      let ay = (targetY - drop.y) * 0.05;
+      this.splashes.push(new Splash(this.x, this.y, ax, ay, color(193, 110, 74)));
+      return true; // Indicate that the drop hit the Dot
+    }
+    return false;
+  }
+
+  tine(v, x, y, z, c) {
+    this.splashes.push(new Splash(x, y, v.x * z, v.y * z, c));
   }
 }
 
 // InkDrop class definition
 class InkDrop {
-  constructor(x, y) {
+  constructor(x, y, r, col) {
     this.x = x;
     this.y = y;
-    this.radius = 40; // Increase the radius
-    this.color = color(255); // Set the color to white
+    this.radius = r;
+    this.color = col;
+    this.splashes = [];
   }
 
-  display() {
+  marble(other) {
+    let d = dist(this.x, this.y, other.x, other.y);
+    if (d < this.radius + other.radius) {
+      let angle = atan2(other.y - this.y, other.x - this.x);
+      let targetX = this.x + cos(angle) * (this.radius + other.radius);
+      let targetY = this.y + sin(angle) * (this.radius + other.radius);
+      let ax = (targetX - other.x) * 0.05;
+      let ay = (targetY - other.y) * 0.05;
+      this.splashes.push(new Splash(this.x, this.y, ax, ay, this.color));
+    }
+  }
+
+  tine(v, x, y, z, c) {
+    this.splashes.push(new Splash(x, y, v.x * z, v.y * z, c));
+  }
+
+  show() {
     noStroke();
     fill(this.color);
     ellipse(this.x, this.y, this.radius * 2);
+
+    for (let splash of this.splashes) {
+      splash.update();
+      splash.show();
+    }
+  }
+}
+
+class Splash {
+  constructor(x, y, vx, vy, col) {
+    this.x = x;
+    this.y = y;
+    this.vx = vx;
+    this.vy = vy;
+    this.color = col;
+    this.lifetime = 255;
+  }
+
+  update() {
+    this.x += this.vx;
+    this.y += this.vy;
+    this.lifetime -= 5;
+  }
+
+  show() {
+    noStroke();
+    fill(red(this.color), green(this.color), blue(this.color), this.lifetime);
+    ellipse(this.x, this.y, 5);
   }
 }
 
@@ -181,6 +276,11 @@ let speed = 7;
 let button;
 
 let inkDrops = []; // Array to store ink drops
+let palette = [];
+let bk;
+let newDrop = true;
+let currentColor;
+let counter = 1;
 
 // Preload function to load sound file
 function preload() {
@@ -200,6 +300,14 @@ function setup() {
   button = createButton("Stage 2");
   button.position((width - button.width) / 2, height - button.height - 2);
   button.mousePressed(changeStage);
+
+  palette = [
+    color(255), // white
+    color(192), // light grey
+    color(128), // dark grey
+    color(0) // black
+  ];
+  bk = color(252, 238, 33);
 
   userStartAudio().then(() => {
     if (songLoaded) {
@@ -244,8 +352,17 @@ function draw() {
     }
 
     // Ink drop effect
+    if (mouseIsPressed && mouseY < height - button.height - 2) {
+      if (newDrop) {
+        currentColor = palette[counter % palette.length];
+        newDrop = false;
+        counter++;
+      }
+      addInk(mouseX, mouseY, 40, currentColor); // Set drop size to 40
+    }
+
     for (let inkDrop of inkDrops) {
-      inkDrop.display();
+      inkDrop.show();
     }
   }
 }
@@ -257,7 +374,7 @@ function windowResized() {
 
   // Adjust the size of the MultiCircles
   multiCircles = [];
-  initMultiCircles(20);
+  initMultiCircles(50);
 }
 
 // Function to initialize MultiCircles
@@ -311,7 +428,30 @@ function changeStage() {
 // Mouse pressed event handler
 function mousePressed() {
   if (stage === 2 && mouseY < height - button.height - 2) {
-    let inkDrop = new InkDrop(mouseX, mouseY);
-    inkDrops.push(inkDrop);
+    newDrop = true;
+    checkInkDrop(mouseX, mouseY, 40, currentColor); // Check for interactions immediately on press with size 40
+  }
+}
+
+function mouseReleased() {
+  newDrop = true;
+}
+
+function addInk(x, y, r, col) {
+  let drop = new InkDrop(x, y, r, col);
+  inkDrops.push(drop);
+}
+
+function checkInkDrop(x, y, r, col) {
+  let drop = new InkDrop(x, y, r, col);
+  for (let i = dots.length - 1; i >= 0; i--) {
+    if (dots[i].marble(drop)) {
+      dots.splice(i, 1);
+    }
+  }
+  for (let i = multiCircles.length - 1; i >= 0; i--) {
+    if (multiCircles[i].marble(drop)) {
+      multiCircles.splice(i, 1);
+    }
   }
 }
