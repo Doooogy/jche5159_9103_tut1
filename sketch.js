@@ -14,6 +14,8 @@ class MultiCircle {
     this.dotRadius = 5;
     this.z = random(width);
     this.pz = this.z;
+    this.noiseOffsetX = random(1000);
+    this.noiseOffsetY = random(1000);
     this.innerAllowedColors = [
       color(87, 98, 100),
       color(180, 172, 153),
@@ -54,6 +56,10 @@ class MultiCircle {
       this.y = random(-height, height);
       this.pz = this.z;
     }
+    this.x += (noise(this.noiseOffsetX) - 0.5) * 2;
+    this.y += (noise(this.noiseOffsetY) - 0.5) * 2;
+    this.noiseOffsetX += 0.01;
+    this.noiseOffsetY += 0.01;
   }
 
   display() {
@@ -149,6 +155,8 @@ class Dot {
     this.y = y;
     this.z = z;
     this.pz = this.z;
+    this.noiseOffsetX = random(1000);
+    this.noiseOffsetY = random(1000);
     this.splashes = [];
   }
 
@@ -160,6 +168,10 @@ class Dot {
       this.y = random(-height, height);
       this.pz = this.z;
     }
+    this.x += (noise(this.noiseOffsetX) - 0.5) * 2;
+    this.y += (noise(this.noiseOffsetY) - 0.5) * 2;
+    this.noiseOffsetX += 0.01;
+    this.noiseOffsetY += 0.01;
   }
 
   display() {
@@ -367,6 +379,28 @@ function draw() {
     }
   } else if (stage === 3) {
     background(0); // Black canvas for stage 3
+    if (frameCount % 30 === 0) { // Every 0.5 seconds (assuming 60 FPS)
+      let x = random(width);
+      let y = random(height);
+      let maxRadius = random(0.05 * min(width, height), 0.2 * min(width, height)); // Use a percentage of the window size
+      multiCircles.push(new MultiCircle(x, y, maxRadius, innerMultiCircleNum, layerNum));
+      
+      for (let i = 0; i < 3; i++) {
+        let x = random(-width, width);
+        let y = random(-height, height);
+        let z = random(width);
+        dots.push(new Dot(x, y, z));
+      }
+    }
+
+    for (let mc of multiCircles) {
+      mc.update(0);
+      mc.display();
+    }
+    for (let dot of dots) {
+      dot.update(0);
+      dot.display();
+    }
   }
 }
 
@@ -376,8 +410,10 @@ function windowResized() {
   button.position((width - button.width) / 2, height - button.height - 2);
 
   // Adjust the size of the MultiCircles
-  multiCircles = [];
-  initMultiCircles(50);
+  if (stage === 1) {
+    multiCircles = [];
+    initMultiCircles(50);
+  }
 }
 
 // Function to initialize MultiCircles
