@@ -1,5 +1,6 @@
 let song;
 let songLoaded = false;
+let stage = 1; // Variable to track the stage
 
 class MultiCircle {
   constructor(x, y, maxRadius, innerMultiCircleNum, layerNum) {
@@ -158,6 +159,7 @@ let layerNum = 5;
 let dotSize = 15;
 let dotDensity = 3;
 let speed = 7;
+let button;
 
 function preload() {
   song = loadSound('assets/music.m4a', () => {
@@ -169,8 +171,13 @@ function preload() {
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  initMultiCircles(20);
-  initDots(100);
+  initMultiCircles(30);
+  initBackgroundDots(1000); // Initialize background dots
+
+  button = createButton("Stage 2");
+  button.position((width - button.width) / 2, height - button.height - 2);
+  button.mousePressed(changeStage);
+
   userStartAudio().then(() => {
     if (songLoaded) {
       song.loop();
@@ -181,40 +188,61 @@ function setup() {
 }
 
 function draw() {
-  background(0);
-  speed = map(mouseX, 0, width, 1, 20);
-  if (songLoaded) {
-    let rate = map(mouseX, 0, width, 0.5, 2);
-    song.rate(rate);
+  if (stage === 1) {
+    background(0);
+    speed = map(mouseX, 0, width, 1, 20);
+    if (songLoaded) {
+      let rate = map(mouseX, 0, width, 0.5, 2);
+      song.rate(rate);
+    }
+
+    for (let dot of dots) {
+      dot.update(speed);
+      dot.display();
+    }
+    for (let mc of multiCircles) {
+      mc.update(speed);
+      mc.display();
+    }
+    updateMultiCircleTimes();
+  } else if (stage === 2) {
+    background(0); // Black canvas for stage 2
+
+    // Static MultiCircles
+    for (let mc of multiCircles) {
+      mc.display();
+    }
+
+    // Static white background dots
+    fill(255);
+    for (let dot of dots) {
+      dot.display();
+    }
   }
-  for (let dot of dots) {
-    dot.update(speed);
-    dot.display();
-  }
-  for (let mc of multiCircles) {
-    mc.update(speed);
-    mc.display();
-  }
-  updateMultiCircleTimes();
 }
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
+  button.position((width - button.width) / 2, height - button.height - 2);
+
+  // Adjust the size of the MultiCircles
+  multiCircles = [];
+  initMultiCircles(20);
 }
 
 function initMultiCircles(count) {
   for (let i = 0; i < count; i++) {
     let x = random(width);
     let y = random(height);
-    let maxRadius = random(50, 200);
+    let maxRadius = random(0.05 * min(width, height), 0.2 * min(width, height)); // Use a percentage of the window size
     multiCircles.push(new MultiCircle(x, y, maxRadius, innerMultiCircleNum, layerNum));
   }
 }
 
-function initDots(count) {
+function initBackgroundDots(count) {
   for (let i = 0; i < count; i++) {
-    let x = random(-width, width);
-    let y = random(-height, height);
+    let x = random(width);
+    let y = random(height);
     let z = random(width);
     dots.push(new Dot(x, y, z));
   }
@@ -223,5 +251,16 @@ function initDots(count) {
 function updateMultiCircleTimes() {
   for (let mc of multiCircles) {
     mc.updateTime();
+  }
+}
+
+function changeStage() {
+  if (stage === 1) {
+    stage = 2;
+    background(0); // Different background color for stage 2
+    // You can add additional logic for stage 2 here
+    if (songLoaded) {
+      song.stop(); // Stop the music when stage changes to 2
+    }
   }
 }
