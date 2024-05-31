@@ -1,5 +1,5 @@
 let song;
-let songLoaded = false; // Flag to check if the song is loaded
+let songLoaded = false;
 
 class MultiCircle {
   constructor(x, y, maxRadius, innerMultiCircleNum, layerNum) {
@@ -10,7 +10,7 @@ class MultiCircle {
     this.layerNum = layerNum;
     this.innerRadius = maxRadius / 2;
     this.dotRadius = 5;
-    this.z = random(width); // Depth value
+    this.z = random(width);
     this.pz = this.z;
     this.innerAllowedColors = [
       color(87, 98, 100),
@@ -28,9 +28,7 @@ class MultiCircle {
     ];
     this.innerColors = this.generateRandomColors(innerMultiCircleNum, this.innerAllowedColors);
     this.outerColor = this.generateRandomColors(1, this.outerAllowedColors)[0];
-    this.hour = hour();
-    this.minute = minute();
-    this.second = second();
+    this.updateTime();
   }
 
   generateRandomColors(num, allowedColors = []) {
@@ -85,6 +83,12 @@ class MultiCircle {
     let minute = this.minute;
     let second = this.second;
     drawClock(sx, sy, hour, minute, second);
+  }
+
+  updateTime() {
+    this.hour = hour();
+    this.minute = minute();
+    this.second = second();
   }
 }
 
@@ -153,10 +157,9 @@ let innerMultiCircleNum = 10;
 let layerNum = 5;
 let dotSize = 15;
 let dotDensity = 3;
-let speed = 7; // Initial speed
+let speed = 7;
 
 function preload() {
-  // Load the music file
   song = loadSound('assets/music.m4a', () => {
     songLoaded = true;
   }, (err) => {
@@ -166,22 +169,8 @@ function preload() {
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-
-  for (let i = 0; i < 20; i++) {
-    let x = random(width);
-    let y = random(height);
-    let maxRadius = random(50, 200);
-    multiCircles.push(new MultiCircle(x, y, maxRadius, innerMultiCircleNum, layerNum));
-  }
-
-  for (let i = 0; i < 100; i++) {
-    let x = random(-width, width);
-    let y = random(-height, height);
-    let z = random(width);
-    dots.push(new Dot(x, y, z));
-  }
-
-  // Play the song in a loop after user interaction
+  initMultiCircles(20);
+  initDots(100);
   userStartAudio().then(() => {
     if (songLoaded) {
       song.loop();
@@ -193,33 +182,46 @@ function setup() {
 
 function draw() {
   background(0);
-  
-  speed = map(mouseX, 0, width, 1, 20); // Adjust speed based on mouseX position
-
-  // Adjust the song speed based on mouseX position
+  speed = map(mouseX, 0, width, 1, 20);
   if (songLoaded) {
     let rate = map(mouseX, 0, width, 0.5, 2);
     song.rate(rate);
   }
-  
   for (let dot of dots) {
     dot.update(speed);
     dot.display();
   }
-  
   for (let mc of multiCircles) {
     mc.update(speed);
     mc.display();
   }
-  
-  // Update time
-  for (let mc of multiCircles) {
-    mc.hour = hour();
-    mc.minute = minute();
-    mc.second = second();
-  }
+  updateMultiCircleTimes();
 }
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
+}
+
+function initMultiCircles(count) {
+  for (let i = 0; i < count; i++) {
+    let x = random(width);
+    let y = random(height);
+    let maxRadius = random(50, 200);
+    multiCircles.push(new MultiCircle(x, y, maxRadius, innerMultiCircleNum, layerNum));
+  }
+}
+
+function initDots(count) {
+  for (let i = 0; i < count; i++) {
+    let x = random(-width, width);
+    let y = random(-height, height);
+    let z = random(width);
+    dots.push(new Dot(x, y, z));
+  }
+}
+
+function updateMultiCircleTimes() {
+  for (let mc of multiCircles) {
+    mc.updateTime();
+  }
 }
