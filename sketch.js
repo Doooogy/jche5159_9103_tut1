@@ -2,6 +2,7 @@ let song;
 let songLoaded = false;
 let stage = 1; // Variable to track the stage
 
+// MultiCircle class definition
 class MultiCircle {
   constructor(x, y, maxRadius, innerMultiCircleNum, layerNum) {
     this.x = x;
@@ -93,6 +94,7 @@ class MultiCircle {
   }
 }
 
+// Function to draw clock
 function drawClock(x, y, hour, minute, second) {
   let hourRadius = 30;
   let minuteRadius = 40;
@@ -115,6 +117,7 @@ function drawClock(x, y, hour, minute, second) {
   line(x, y, x + cos(secondAngle) * secondRadius, y + sin(secondAngle) * secondRadius);
 }
 
+// Dot class definition
 class Dot {
   constructor(x, y, z) {
     this.x = x;
@@ -152,6 +155,22 @@ class Dot {
   }
 }
 
+// InkDrop class definition
+class InkDrop {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+    this.radius = 40; // Increase the radius
+    this.color = color(255); // Set the color to white
+  }
+
+  display() {
+    noStroke();
+    fill(this.color);
+    ellipse(this.x, this.y, this.radius * 2);
+  }
+}
+
 let multiCircles = [];
 let dots = [];
 let innerMultiCircleNum = 10;
@@ -161,6 +180,9 @@ let dotDensity = 3;
 let speed = 7;
 let button;
 
+let inkDrops = []; // Array to store ink drops
+
+// Preload function to load sound file
 function preload() {
   song = loadSound('assets/music.m4a', () => {
     songLoaded = true;
@@ -169,11 +191,12 @@ function preload() {
   });
 }
 
+// Setup function
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  initMultiCircles(30);
-  initBackgroundDots(1000); // Initialize background dots
-
+  initMultiCircles(20);
+  initDots(100);
+  initBackgroundDots(1000);
   button = createButton("Stage 2");
   button.position((width - button.width) / 2, height - button.height - 2);
   button.mousePressed(changeStage);
@@ -187,6 +210,7 @@ function setup() {
   });
 }
 
+// Draw function
 function draw() {
   if (stage === 1) {
     background(0);
@@ -218,9 +242,15 @@ function draw() {
     for (let dot of dots) {
       dot.display();
     }
+
+    // Ink drop effect
+    for (let inkDrop of inkDrops) {
+      inkDrop.display();
+    }
   }
 }
 
+// Window resize event handler
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
   button.position((width - button.width) / 2, height - button.height - 2);
@@ -230,6 +260,7 @@ function windowResized() {
   initMultiCircles(20);
 }
 
+// Function to initialize MultiCircles
 function initMultiCircles(count) {
   for (let i = 0; i < count; i++) {
     let x = random(width);
@@ -239,6 +270,17 @@ function initMultiCircles(count) {
   }
 }
 
+// Function to initialize dots
+function initDots(count) {
+  for (let i = 0; i < count; i++) {
+    let x = random(-width, width);
+    let y = random(-height, height);
+    let z = random(width);
+    dots.push(new Dot(x, y, z));
+  }
+}
+
+// Function to initialize background dots
 function initBackgroundDots(count) {
   for (let i = 0; i < count; i++) {
     let x = random(width);
@@ -248,19 +290,28 @@ function initBackgroundDots(count) {
   }
 }
 
+// Function to update MultiCircle times
 function updateMultiCircleTimes() {
   for (let mc of multiCircles) {
     mc.updateTime();
   }
 }
 
+// Function to change stage
 function changeStage() {
   if (stage === 1) {
     stage = 2;
     background(0); // Different background color for stage 2
-    // You can add additional logic for stage 2 here
     if (songLoaded) {
       song.stop(); // Stop the music when stage changes to 2
     }
+  }
+}
+
+// Mouse pressed event handler
+function mousePressed() {
+  if (stage === 2 && mouseY < height - button.height - 2) {
+    let inkDrop = new InkDrop(mouseX, mouseY);
+    inkDrops.push(inkDrop);
   }
 }
