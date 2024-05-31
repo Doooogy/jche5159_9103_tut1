@@ -294,7 +294,7 @@ function preload() {
 // Setup function
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  initMultiCircles(20);
+  initMultiCircles(50);
   initDots(100);
   initBackgroundDots(1000);
   button = createButton("Stage 2");
@@ -311,7 +311,7 @@ function setup() {
 
   userStartAudio().then(() => {
     if (songLoaded) {
-      song.loop();
+      song.loop(); // Start the music when the sketch is initialized
     } else {
       console.error('Sound file not loaded yet');
     }
@@ -323,10 +323,11 @@ function draw() {
   if (stage === 1) {
     background(0);
     speed = map(mouseX, 0, width, 1, 20);
-    if (songLoaded) {
-      let rate = map(mouseX, 0, width, 0.5, 2);
-      song.rate(rate);
+    if (songLoaded && !song.isPlaying()) {
+      song.loop(); // Ensure the music is playing in stage 1
     }
+    let rate = map(mouseX, 0, width, 0.5, 2);
+    song.rate(rate);
 
     for (let dot of dots) {
       dot.update(speed);
@@ -358,12 +359,14 @@ function draw() {
         newDrop = false;
         counter++;
       }
-      addInk(mouseX, mouseY, 40, currentColor); // Set drop size to 40
+      addInk(mouseX, mouseY, 35, currentColor); // Set drop size to 35
     }
 
     for (let inkDrop of inkDrops) {
       inkDrop.show();
     }
+  } else if (stage === 3) {
+    background(0); // Black canvas for stage 3
   }
 }
 
@@ -419,8 +422,26 @@ function changeStage() {
   if (stage === 1) {
     stage = 2;
     background(0); // Different background color for stage 2
-    if (songLoaded) {
-      song.stop(); // Stop the music when stage changes to 2
+    button.html("Stage 3"); // Change button text to "Stage 3"
+    if (songLoaded && song.isPlaying()) {
+      song.stop(); // Stop the music when stage changes from 1
+    }
+  } else if (stage === 2) {
+    stage = 3;
+    background(0); // Clear canvas and set to black for stage 3
+    dots = [];
+    multiCircles = [];
+    inkDrops = [];
+    button.html("Stage 1"); // Change button text to "Stage 1"
+  } else if (stage === 3) {
+    stage = 1;
+    background(0); // Clear canvas and set to black for stage 1
+    initMultiCircles(50);
+    initDots(100);
+    initBackgroundDots(1000);
+    button.html("Stage 2"); // Change button text to "Stage 2"
+    if (songLoaded && !song.isPlaying()) {
+      song.loop(); // Start the music when stage changes to 1
     }
   }
 }
@@ -429,7 +450,7 @@ function changeStage() {
 function mousePressed() {
   if (stage === 2 && mouseY < height - button.height - 2) {
     newDrop = true;
-    checkInkDrop(mouseX, mouseY, 40, currentColor); // Check for interactions immediately on press with size 40
+    checkInkDrop(mouseX, mouseY, 35, currentColor); // Check for interactions immediately on press with size 35
   }
 }
 
