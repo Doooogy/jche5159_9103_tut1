@@ -1,3 +1,6 @@
+let song;
+let songLoaded = false; // Flag to check if the song is loaded
+
 class MultiCircle {
   constructor(x, y, maxRadius, innerMultiCircleNum, layerNum) {
     this.x = x;
@@ -152,6 +155,15 @@ let dotSize = 15;
 let dotDensity = 3;
 let speed = 7; // Initial speed
 
+function preload() {
+  // Load the music file
+  song = loadSound('assets/music.m4a', () => {
+    songLoaded = true;
+  }, (err) => {
+    console.error('Failed to load sound file', err);
+  });
+}
+
 function setup() {
   createCanvas(windowWidth, windowHeight);
 
@@ -168,12 +180,27 @@ function setup() {
     let z = random(width);
     dots.push(new Dot(x, y, z));
   }
+
+  // Play the song in a loop after user interaction
+  userStartAudio().then(() => {
+    if (songLoaded) {
+      song.loop();
+    } else {
+      console.error('Sound file not loaded yet');
+    }
+  });
 }
 
 function draw() {
   background(0);
   
   speed = map(mouseX, 0, width, 1, 20); // Adjust speed based on mouseX position
+
+  // Adjust the song speed based on mouseX position
+  if (songLoaded) {
+    let rate = map(mouseX, 0, width, 0.5, 2);
+    song.rate(rate);
+  }
   
   for (let dot of dots) {
     dot.update(speed);
