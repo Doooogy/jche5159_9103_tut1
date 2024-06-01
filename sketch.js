@@ -1,6 +1,15 @@
+// Starfield simulation tech:https://www.youtube.com/watch?v=17WoOqgXsRM
+// "map" function tech:https://p5js.org/reference/#/p5/map
+// Add ink drops tech:https://www.youtube.com/watch?v=p7IGZTjC008
+// "palette" array tech:https://github.com/remistura/p5.palette
+// Music played speed tech:https://www.geeksforgeeks.org/p5-js-rate-function/
+// Button text in HTML tech:https://www.youtube.com/watch?v=587qclhguQg
+
 let song; // Variable to store the song
 let songLoaded = false; // Flag to track if the song is loaded
 let stage = 1; // Variable to track the current stage
+let stage3StartTime = 0; // Variable to store the start time of Stage 3
+let inkDropRadiusPercentage = 0.05; // Percentage of the canvas size for InkDrop radius
 
 // MultiCircle class definition
 class MultiCircle {
@@ -28,12 +37,11 @@ class MultiCircle {
       color(198, 177, 107), // Outer allowed color
       color(124, 167, 195), // Outer allowed color
       color(141, 164, 189), // Outer allowed color
-      color(228, 122, 77), // Outer allowed color
+      color(228, 122, 77) // Outer allowed color
     ];
     this.innerColors = this.generateRandomColors(innerMultiCircleNum, this.innerAllowedColors); // Generate inner colors
     this.outerColor = this.generateRandomColors(1, this.outerAllowedColors)[0]; // Generate outer color
     this.updateTime(); // Update time
-    this.splashes = []; // Array to store splashes
   }
 
   generateRandomColors(num, allowedColors = []) {
@@ -92,12 +100,6 @@ class MultiCircle {
     let minute = this.minute; // Get minute
     let second = this.second; // Get second
     drawClock(sx, sy, hour, minute, second); // Draw clock
-
-    // Display splashes
-    for (let splash of this.splashes) {
-      splash.update(); // Update splash
-      splash.show(); // Show splash
-    }
   }
 
   updateTime() {
@@ -106,22 +108,15 @@ class MultiCircle {
     this.second = second(); // Get current second
   }
 
-  marble(drop) {
+  checkCollision(drop) {
     let d = dist(this.x, this.y, drop.x, drop.y); // Calculate distance to drop
     if (d < this.maxRadius + drop.radius) {
       let angle = atan2(drop.y - this.y, drop.x - this.x); // Calculate angle to drop
       let targetX = this.x + cos(angle) * (this.maxRadius + drop.radius); // Calculate target x
       let targetY = this.y + sin(angle) * (this.maxRadius + drop.radius); // Calculate target y
-      let ax = (targetX - drop.x) * 0.05; // Calculate x acceleration
-      let ay = (targetY - drop.y) * 0.05; // Calculate y acceleration
-      this.splashes.push(new Splash(this.x, this.y, ax, ay, this.outerColor)); // Add splash
       return true; // Indicate that the drop hit the MultiCircle
     }
     return false; // Indicate that the drop did not hit the MultiCircle
-  }
-
-  tine(v, x, y, z, c) {
-    this.splashes.push(new Splash(x, y, v.x * z, v.y * z, c)); // Add splash
   }
 }
 
@@ -157,7 +152,6 @@ class Dot {
     this.pz = this.z; // Previous z-coordinate
     this.noiseOffsetX = random(1000); // Random noise offset for x
     this.noiseOffsetY = random(1000); // Random noise offset for y
-    this.splashes = []; // Array to store splashes
   }
 
   update(speed) {
@@ -190,92 +184,46 @@ class Dot {
 
     stroke(193, 110, 74); // Set stroke color
     line(px, py, sx, sy); // Draw line
-
-    // Display splashes
-    for (let splash of this.splashes) {
-      splash.update(); // Update splash
-      splash.show(); // Show splash
-    }
   }
 
-  marble(drop) {
+  checkCollision(drop) {
     let d = dist(this.x, this.y, drop.x, drop.y); // Calculate distance to drop
     if (d < dotSize + drop.radius) {
       let angle = atan2(drop.y - this.y, drop.x - this.x); // Calculate angle to drop
       let targetX = this.x + cos(angle) * (dotSize + drop.radius); // Calculate target x
       let targetY = this.y + sin(angle) * (dotSize + drop.radius); // Calculate target y
-      let ax = (targetX - drop.x) * 0.05; // Calculate x acceleration
-      let ay = (targetY - drop.y) * 0.05; // Calculate y acceleration
-      this.splashes.push(new Splash(this.x, this.y, ax, ay, color(193, 110, 74))); // Add splash
       return true; // Indicate that the drop hit the Dot
     }
     return false; // Indicate that the drop did not hit the Dot
-  }
-
-  tine(v, x, y, z, c) {
-    this.splashes.push(new Splash(x, y, v.x * z, v.y * z, c)); // Add splash
   }
 }
 
 // InkDrop class definition
 class InkDrop {
-  constructor(x, y, r, col) {
+  constructor(x, y, col) {
     this.x = x; // x-coordinate
     this.y = y; // y-coordinate
-    this.radius = r; // Radius
     this.color = col; // Color
-    this.splashes = []; // Array to store splashes
+    this.radius = inkDropRadiusPercentage * min(width, height); // Radius as a percentage of canvas size
   }
 
-  marble(other) {
+  checkCollision(other) {
     let d = dist(this.x, this.y, other.x, other.y); // Calculate distance to other
     if (d < this.radius + other.radius) {
       let angle = atan2(other.y - this.y, other.x - this.x); // Calculate angle to other
       let targetX = this.x + cos(angle) * (this.radius + other.radius); // Calculate target x
       let targetY = this.y + sin(angle) * (this.radius + other.radius); // Calculate target y
-      let ax = (targetX - other.x) * 0.05; // Calculate x acceleration
-      let ay = (targetY - other.y) * 0.05; // Calculate y acceleration
-      this.splashes.push(new Splash(this.x, this.y, ax, ay, this.color)); // Add splash
     }
-  }
-
-  tine(v, x, y, z, c) {
-    this.splashes.push(new Splash(x, y, v.x * z, v.y * z, c)); // Add splash
   }
 
   show() {
     noStroke(); // Disable stroke
     fill(this.color); // Set fill color
     ellipse(this.x, this.y, this.radius * 2); // Draw ellipse
-
-    for (let splash of this.splashes) {
-      splash.update(); // Update splash
-      splash.show(); // Show splash
-    }
-  }
-}
-
-// Splash class definition
-class Splash {
-  constructor(x, y, vx, vy, col) {
-    this.x = x; // x-coordinate
-    this.y = y; // y-coordinate
-    this.vx = vx; // x-velocity
-    this.vy = vy; // y-velocity
-    this.color = col; // Color
-    this.lifetime = 255; // Lifetime
   }
 
-  update() {
-    this.x += this.vx; // Update x by velocity
-    this.y += this.vy; // Update y by velocity
-    this.lifetime -= 5; // Decrease lifetime
-  }
-
-  show() {
-    noStroke(); // Disable stroke
-    fill(red(this.color), green(this.color), blue(this.color), this.lifetime); // Set fill color
-    ellipse(this.x, this.y, 5); // Draw ellipse
+  updateRadius() {
+    this.radius = inkDropRadiusPercentage * min(width, height); // Update radius based on canvas size
   }
 }
 
@@ -290,7 +238,6 @@ let button; // Button
 
 let inkDrops = []; // Array to store ink drops
 let palette = []; // Palette
-let bk; // Background color
 let newDrop = true; // Flag for new drop
 let currentColor; // Current color
 let counter = 1; // Counter
@@ -300,7 +247,7 @@ function preload() {
   song = loadSound('assets/music.m4a', () => {
     songLoaded = true; // Set song loaded flag
   }, (err) => {
-    console.error('Failed to load sound file', err); // Log error
+    console.error('Failed to load sound file', err); // Report error
   });
 }
 
@@ -320,39 +267,33 @@ function setup() {
     color(128), // dark grey
     color(0) // black
   ];
-  bk = color(252, 238, 33); // Background color
 
   userStartAudio().then(() => {
     if (songLoaded) {
       song.loop(); // Start the music when the sketch is initialized
     } else {
-      console.error('Sound file not loaded yet'); // Log error
+      console.error('Sound file not loaded yet'); // Report error
     }
   });
 }
-
-let musicPlaying = false; // Flag to track if music is playing
 
 // Draw function
 function draw() {
   if (stage === 1) {
     background(0); // Set background color
     speed = map(mouseX, 0, width, 1, 20); // Map mouseX to speed
-    
-    if (songLoaded && !musicPlaying) { // Check if the song is loaded and music is not already playing
-      song.loop(); // Start playing the song
-      musicPlaying = true; // Update flag
-    }
 
     let rate = map(mouseX, 0, width, 0.5, 2); // Map mouseX to rate
     song.rate(rate); // Set song rate
-  
+
     fill(255); // Set fill color for text
     textSize(32); // Set text size
-    text("Stage 1", 10, 40); // Draw stage text
+    textAlign(LEFT, TOP); // Set text alignment
+    text("Stage 1", 20, 40); // Draw stage text with a fixed left margin
     textSize(16); // Set text size
-    text("Young people always believe they are in control of the world: Move Mouse", 10, 70); // Draw description text
-  
+    text("Young people always believe they are in control of the world", 20, 80); // Draw description text with a fixed left margin
+    text("Click then Move, to control speed", 20, 105); // Draw description text with a fixed left margin
+
     for (let dot of dots) {
       dot.update(speed); // Update dot
       dot.display(); // Display dot
@@ -361,15 +302,17 @@ function draw() {
       mc.update(speed); // Update MultiCircle
       mc.display(); // Display MultiCircle
     }
-    updateMultiCircleTimes(); // Update MultiCircle times   
+    updateMultiCircleTimes(); // Update MultiCircle times
   } else if (stage === 2) {
     background(0); // Set background color
 
     fill(255); // Set fill color for text
     textSize(32); // Set text size
-    text("Stage 2", 10, 40); // Draw stage text
+    textAlign(LEFT, TOP); // Set text alignment
+    text("Stage 2", 20, 40); // Draw stage text with a fixed left margin
     textSize(16); // Set text size
-    text("However, as time goes by, the world decays: Press Mouse", 10, 70); // Draw description text
+    text("However, as time goes by, the world decays", 20, 80); // Draw description text with a fixed left margin
+    text("Press Mouse to affect the world", 20, 105); // Draw description text with a fixed left margin
 
     // Static MultiCircles
     for (let mc of multiCircles) {
@@ -389,27 +332,37 @@ function draw() {
         newDrop = false; // Reset newDrop flag
         counter++; // Increment counter
       }
-      addInk(mouseX, mouseY, 35, currentColor); // Add ink drop
+      addInk(mouseX, mouseY, currentColor); // Add ink drop
     }
 
     for (let inkDrop of inkDrops) {
       inkDrop.show(); // Show ink drop
     }
   } else if (stage === 3) {
+    if (frameCount - stage3StartTime > 1800) { // Automatically change to Stage 1 after 30 seconds 
+      changeStageTo1();
+      return;
+    }
+
     background(0); // Set background color
+    if (songLoaded && !song.isPlaying()) {
+      song.rate(0.75); // Set song rate to 0.75x
+      song.play(); // Start the music when entering stage 3
+    }
 
     fill(255); // Set fill color for text
     textSize(32); // Set text size
     textAlign(CENTER, CENTER); // Center text
     text("Then reborn and prosperous", width / 2, height / 2); // Draw stage text
 
-    if (frameCount % 30 === 0) { // Every 0.5 seconds (assuming 60 FPS)
+    if (frameCount % 30 === 0) { // Emerge MultiCircles and Dots every 0.5 seconds
       let x = random(width); // Randomize x
       let y = random(height); // Randomize y
       let maxRadius = random(0.05 * min(width, height), 0.2 * min(width, height)); // Randomize radius
       multiCircles.push(new MultiCircle(x, y, maxRadius, innerMultiCircleNum, layerNum)); // Add MultiCircle
 
-      for (let i = 0; i < 3; i++) {
+      // Add dots
+      for (let i = 0; i < 10; i++) {
         let x = random(-width, width); // Randomize x
         let y = random(-height, height); // Randomize y
         let z = random(width); // Randomize z
@@ -431,13 +384,18 @@ function draw() {
 // Window resize event handler
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight); // Resize canvas
-  button.position((width - button.width) / 2, height - button.height - 2); // Reposition button
+  if (stage !== 3) { // Recreate the button if not in stage 3
+    button.position((width - button.width) / 2, height - button.height - 2); // Reposition button
+  }
 
   // Adjust the size of the MultiCircles
   if (stage === 1) {
     multiCircles = []; // Clear MultiCircles
     initMultiCircles(50); // Reinitialize MultiCircles
   }
+
+  // Update the radius of all ink drops
+  updateInkDropRadii();
 }
 
 // Function to initialize MultiCircles
@@ -492,17 +450,23 @@ function changeStage() {
     dots = []; // Clear dots
     multiCircles = []; // Clear MultiCircles
     inkDrops = []; // Clear ink drops
-    button.html("Stage 1"); // Change button text
-  } else if (stage === 3) {
-    stage = 1; // Change to stage 1
-    background(0); // Set background color
-    initMultiCircles(50); // Reinitialize MultiCircles
-    initDots(100); // Reinitialize dots
-    initBackgroundDots(1000); // Reinitialize background dots
-    button.html("Stage 2"); // Change button text
-    if (songLoaded && !song.isPlaying()) {
-      song.loop(); // Start the music when stage changes to 1
-    }
+    button.remove(); // Remove the button in stage 3
+    stage3StartTime = frameCount; // Record the start time of Stage 3
+  }
+}
+
+// Function to change stage to 1 directly (used for automatic transition)
+function changeStageTo1() {
+  stage = 1; // Change to stage 1
+  background(0); // Set background color
+  initMultiCircles(50); // Reinitialize MultiCircles
+  initDots(100); // Reinitialize dots
+  initBackgroundDots(1000); // Reinitialize background dots
+  button = createButton("Stage 2"); // Recreate button
+  button.position((width - button.width) / 2, height - button.height - 2); // Position button
+  button.mousePressed(changeStage); // Set button click handler
+  if (songLoaded && !song.isPlaying()) {
+    song.loop(); // Start the music when stage changes to 1
   }
 }
 
@@ -510,7 +474,7 @@ function changeStage() {
 function mousePressed() {
   if (stage === 2 && mouseY < height - button.height - 2) {
     newDrop = true; // Set newDrop flag
-    checkInkDrop(mouseX, mouseY, 35, currentColor); // Check for interactions immediately on press
+    checkInkDrop(mouseX, mouseY, currentColor); // Check for interactions immediately on press
   }
 }
 
@@ -519,22 +483,29 @@ function mouseReleased() {
 }
 
 // Function to add ink drop
-function addInk(x, y, r, col) {
-  let drop = new InkDrop(x, y, r, col); // Create new ink drop
+function addInk(x, y, col) {
+  let drop = new InkDrop(x, y, col); // Create new ink drop
   inkDrops.push(drop); // Add to array
 }
 
 // Function to check ink drop interactions
-function checkInkDrop(x, y, r, col) {
-  let drop = new InkDrop(x, y, r, col); // Create new ink drop
+function checkInkDrop(x, y, col) {
+  let drop = new InkDrop(x, y, col); // Create new ink drop
   for (let i = dots.length - 1; i >= 0; i--) {
-    if (dots[i].marble(drop)) {
+    if (dots[i].checkCollision(drop)) {
       dots.splice(i, 1); // Remove dot if hit
     }
   }
   for (let i = multiCircles.length - 1; i >= 0; i--) {
-    if (multiCircles[i].marble(drop)) {
+    if (multiCircles[i].checkCollision(drop)) {
       multiCircles.splice(i, 1); // Remove MultiCircle if hit
     }
+  }
+}
+
+// Function to update the radius of ink drops when window resized
+function updateInkDropRadii() {
+  for (let inkDrop of inkDrops) {
+    inkDrop.updateRadius(); // Update radius based on new canvas size
   }
 }

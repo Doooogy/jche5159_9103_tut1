@@ -3,81 +3,124 @@
 ## Artwork Description:
 ### outline
 Methods: User Input
-There are three stages in this project, representing the beginning, decay and rebirth of fate.
+There are three stages in this project, representing the beginning, decay and rebirth of fate. Compared with other group members, this project emphasizes user interaction to reflect the individual's control and choice of destiny. In order to express time, which is an element throughout the 3 stages, I incorporated the appearance of clocks into the group basics, and set background to be black to indicate universe.
 
 * **Stage 1:**
-  Users control the image movement and music playback speed by moving the mouse horizontally, which means controlling fate.
+  Users control the image movement and music playback speed by moving the mouse horizontally, which means controlling fate. Click to start playing music.
 
 * **Stage 2:**
-  Users press the mouse to influence the Canvas, which means the butterfly effect caused by different choices in fate.
+  Users press the mouse to influence the Canvas, which means the butterfly effect caused by different choices in fate. If the ink dot collides with an element, the element disappears.
 
 * **Stage 3:**
-  The increasing and randomly moving images represent the occurrence of the multiverse.
+  The increasing and randomly moving images represent the occurrence of the multiverse. After 30 seconds, the page will return to Stage 1 automatically.
 
 
 ## Inspiration:
 ### Wheels of fortune
-We selected Pacita Abad's 'Wheels of fortune' as our inspiration image. Pacita’s works contain her thoughts on fate. She is an outstanding female writer in the Philippines. Her travels in Asia deeply inspired her, so combined with the ancient Chinese Dunhuang culture, I hope to show the theme of the ups and downs of fate.
+We selected Pacita Abad's 'Wheels of fortune' as our inspiration image. Pacita’s works contain her thoughts on fate. She is an outstanding female writer in the Philippines. Her travels in Asia deeply inspired her, so combined with the ancient Asia's Dunhuang culture, I hope to show the theme of the ups and downs of fate, and people's ideas about controlling their destiny. In addition, the simple low-saturation colors are more conducive to showing the sense of history.
 
+[Introduction of Pacita's story](https://www.artsy.net/artwork/pacita-abad-wheels-of-fortune)
 [![Pacita Abad Wheels of fortune.jpg](https://img2.imgtp.com/2024/05/30/23dRn1bE.jpg)](https://img2.imgtp.com/2024/05/30/23dRn1bE.jpg)
 
 ### Starfield Simulation
-Through the visualization simulation of the starry sky and warp speed, a visual effect of things coming towards you is presented.
+Through the visualization simulation of the starry sky and warp speed, a visual effect of things coming towards user is presented. The arrival of destiny is irresistible.
 
-[Link Text](https://www.youtube.com/watch?v=17WoOqgXsRM)
-
-* Defines a dot and a circle object that can be updated and displayed on a canvas. The update() method moves them based on its depth (z), and then displays the dots and its trail on the canvas.
-  
-```
-   display() {
-    fill(231, 231, 224); // Set fill color
-    noStroke(); // Disable stroke
-
-    let sx = map(this.x / this.z, 0, 1, 0, width); // Map x to screen
-    let sy = map(this.y / this.z, 0, 1, 0, height); // Map y to screen
-    let r = map(this.z, 0, width, dotSize, 0); // Map radius
-    ellipse(sx, sy, r, r); // Draw dot
-
-    let px = map(this.x / this.pz, 0, 1, 0, width); // Map previous x to screen
-    let py = map(this.y / this.pz, 0, 1, 0, height); // Map previous y to screen
-
-    this.pz = this.z; // Update previous z-coordinate
-
-    stroke(193, 110, 74); // Set stroke color
-    line(px, py, sx, sy); // Draw line}
-
-```
+[Introduction of Starfield Simulation](https://www.youtube.com/watch?v=17WoOqgXsRM)
+![Star](https://github.com/Doooogy/jche5159_9103_tut1/blob/d32f7f47506bc5c6060061846aa02c135186de41/assets/Star.jpg)
 
 ### Ink Drops
-Use marbling colour to simulate ink dripping when the mouse is pressed.
+After making the canvas static, the user should interact with it to highlight the theme. Drip some dots to represent the impact of personal choices on destiny.
 
-[Link Text](https://www.youtube.com/watch?v=p7IGZTjC008)
+[Introduction of Ink Drops](https://www.youtube.com/watch?v=p7IGZTjC008)
+![Ink Drop](https://github.com/Doooogy/jche5159_9103_tut1/blob/d32f7f47506bc5c6060061846aa02c135186de41/assets/Ink%20Drop.jpg)
 
-* The marble method in the InkDrop class is responsible for detecting interactions between the ink drop and other elements (MultiCircles, Dots).
-* It takes another object (e.g., a Dot or MultiCircle) as a parameter and checks if the distance between the ink drop and that object is less than the sum of their radii (this.radius + other.radius).
-* If they are close enough (d < this.radius + other.radius), it calculates the angle to the other object and adjusts the ink drop's position (targetX and targetY) so that it looks like the ink is "marbling" around the other object.
-* It then calculates the acceleration (ax and ay) towards the target position and creates a new Splash object at the ink drop's position with the calculated acceleration and color.
-  
+### Cornfield Chase
+Cornfield Chase is a song composed by Hans Zimmer for Interstellar. The sense of fate and the undulating waves of sound are very consistent with the theme. In order to combine with the ancient Asian culture, I chose to use the national instrument Guzheng to reinterpret the tune.
 
-```
-  marble(drop) {
-    let d = dist(this.x, this.y, drop.x, drop.y); // Calculate distance to drop
-    if (d < dotSize + drop.radius) {
-      let angle = atan2(drop.y - this.y, drop.x - this.x); // Calculate angle to drop
-      let targetX = this.x + cos(angle) * (dotSize + drop.radius); // Calculate target x
-      let targetY = this.y + sin(angle) * (dotSize + drop.radius); // Calculate target y
-      let ax = (targetX - drop.x) * 0.05; // Calculate x acceleration
-      let ay = (targetY - drop.y) * 0.05; // Calculate y acceleration
-      this.splashes.push(new Splash(this.x, this.y, ax, ay, color(193, 110, 74))); // Add splash
-      return true; // Indicate that the drop hit the Dot
-    }
-    return false; // Indicate that the drop did not hit the Dot
-  }
+[Complete Guzheng Song](https://www.bilibili.com/video/BV1jT4y1q78n/?spm_id_from=333.337.search-card.all.click&vd_source=bc951931180c440a2da29944e924aca6)
 
-  tine(v, x, y, z, c) {
-    this.splashes.push(new Splash(x, y, v.x * z, v.y * z, c)); // Add splash
-  }
+## Code Description:
+### Class
+* **MultiCircle Class:**
+-constructor(x, y, maxRadius, innerMultiCircleNum, layerNum): Initializes a new MultiCircle object with the specified coordinates, maximum radius, number of inner circles, and number of layers.
 
-```
+-generateRandomColors(num, allowedColors = []): Generates an array of random colors, optionally from a set of allowed colors.
 
+-update(speed): Updates the position and depth of the circle based on a speed parameter.
 
+-display(): Displays the MultiCircle on the canvas.
+
+-updateTime(): Updates the internal time used for displaying a clock.
+
+-checkCollision(drop): Checks if the MultiCircle collides with an InkDrop.
+
+* **Dot Class:**
+-constructor(x, y, z): Initializes a new Dot object with the specified coordinates and depth.
+
+-update(speed): Updates the position and depth of the dot based on a speed parameter.
+
+-display(): Displays the Dot on the canvas.
+
+-checkCollision(drop): Checks if the Dot collides with an InkDrop.
+
+* **InkDrop Class:**
+-constructor(x, y, col): Initializes a new InkDrop object with the specified coordinates and color.
+
+-checkCollision(other): Checks if the InkDrop collides with another object.
+
+-show(): Displays the InkDrop on the canvas.
+
+-updateRadius(): Updates the radius of the InkDrop based on the canvas size.
+
+### Function
+* **preload():**
+Loads the sound file in advance.
+
+* **setup():**
+Sets up the canvas, initializes objects, and audio.
+
+* **draw():**
+Main draw loop that handles the different stages.
+
+* **windowResized():**
+Handles canvas resizing and reinitializes objects if needed.
+
+* **initMultiCircles(count):**
+Initializes MultiCircle objects. initDots(count) and initBackgroundDots(count) work similarly.
+
+* **updateMultiCircleTimes():**
+Updates the time for all MultiCircle objects.
+
+* **changeStage():**
+Changes between stages. changeStageTo1() works similarly.
+
+* **mousePressed():**
+Handles mouse pressed events in stage 2.
+
+* **addInk(x, y, col):**
+Adds a new InkDrop at the specified coordinates with the specified color.
+
+* **checkInkDrop(x, y, col):**
+Checks for collisions between InkDrop and other objects.
+
+* **updateInkDropRadii():**
+Updates the radii of all InkDrop objects when the window is resized.
+
+### Reference
+[Starfield simulation tech](https://www.youtube.com/watch?v=17WoOqgXsRM)
+Inspired me to create a dynamic universe by shifting group basic elements outwards.
+
+["map" function tech](https://p5js.org/reference/#/p5/map)
+The map function in the code is used to re-map a number from one range to another range. In this project, the map function is converting the coordinates of the MultiCircle or Dot object from its original range to the screen's width and height.
+
+[Add ink drops tech](https://www.youtube.com/watch?v=p7IGZTjC008)
+Inspired me to add ink dots as an interaction between Stage 2 and the fate element.
+
+["palette" array tech](https://github.com/remistura/p5.palette)
+The palette array in code defines a set of colors that can be used for the ink drops in Stage 2, ensuring that each new ink drop gets a color from the palette in sequence. The modulo operator (%) is used to loop back to the beginning of the palette once the end is reached.
+
+[Music played speed tech](https://www.geeksforgeeks.org/p5-js-rate-function/)
+Music speed is controlled using the rate() function from the p5.js sound library. The speed of the music is dynamically adjusted based on the horizontal position of the mouse within the canvas during Stage 1. 
+
+[Button text in HTML tech](https://www.youtube.com/watch?v=587qclhguQg)
+The button.html() method in the p5.js library is used to change the content (inner HTML) of an HTML element. In this context, it is used to update the text displayed on the button.
