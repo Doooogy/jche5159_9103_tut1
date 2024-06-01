@@ -41,36 +41,36 @@ Cornfield Chase is a song composed by Hans Zimmer for Interstellar. The sense of
 
 ## Code Description:
 ### Class
-* **MultiCircle Class:**
--constructor(x, y, maxRadius, innerMultiCircleNum, layerNum): Initializes a new MultiCircle object with the specified coordinates, maximum radius, number of inner circles, and number of layers.
+* **MultiCircle Class:**  
+- constructor(x, y, maxRadius, innerMultiCircleNum, layerNum): Initializes a new MultiCircle object with the specified coordinates, maximum radius, number of inner circles, and number of layers.
 
--generateRandomColors(num, allowedColors = []): Generates an array of random colors, optionally from a set of allowed colors.
+- generateRandomColors(num, allowedColors = []): Generates an array of random colors, optionally from a set of allowed colors.
 
--update(speed): Updates the position and depth of the circle based on a speed parameter.
+- update(speed): Updates the position and depth of the circle based on a speed parameter.
 
--display(): Displays the MultiCircle on the canvas.
+- display(): Displays the MultiCircle on the canvas.
 
--updateTime(): Updates the internal time used for displaying a clock.
+- updateTime(): Updates the internal time used for displaying a clock.
 
--checkCollision(drop): Checks if the MultiCircle collides with an InkDrop.
+- checkCollision(drop): Checks if the MultiCircle collides with an InkDrop.
 
-* **Dot Class:**
--constructor(x, y, z): Initializes a new Dot object with the specified coordinates and depth.
+* **Dot Class:**  
+- constructor(x, y, z): Initializes a new Dot object with the specified coordinates and depth.
 
--update(speed): Updates the position and depth of the dot based on a speed parameter.
+- update(speed): Updates the position and depth of the dot based on a speed parameter.
 
--display(): Displays the Dot on the canvas.
+- display(): Displays the Dot on the canvas.
 
--checkCollision(drop): Checks if the Dot collides with an InkDrop.
+- checkCollision(drop): Checks if the Dot collides with an InkDrop.
 
-* **InkDrop Class:**
--constructor(x, y, col): Initializes a new InkDrop object with the specified coordinates and color.
+* **InkDrop Class:**  
+- constructor(x, y, col): Initializes a new InkDrop object with the specified coordinates and color.
 
--checkCollision(other): Checks if the InkDrop collides with another object.
+- checkCollision(other): Checks if the InkDrop collides with another object.
 
--show(): Displays the InkDrop on the canvas.
+- show(): Displays the InkDrop on the canvas.
 
--updateRadius(): Updates the radius of the InkDrop based on the canvas size.
+- updateRadius(): Updates the radius of the InkDrop based on the canvas size.
 
 ### Function
 * **preload():**
@@ -107,20 +107,20 @@ Checks for collisions between InkDrop and other objects.
 Updates the radii of all InkDrop objects when the window is resized.
 
 ### Reference
-[Starfield simulation tech](https://www.youtube.com/watch?v=17WoOqgXsRM)
+[Starfield simulation tech:](https://www.youtube.com/watch?v=17WoOqgXsRM)
 Inspired me to create a dynamic universe by shifting group basic elements outwards.
 
-["map" function tech](https://p5js.org/reference/#/p5/map)
+["map" function tech:](https://p5js.org/reference/#/p5/map)
 The map function in the code is used to re-map a number from one range to another range. In this project, the map function is converting the coordinates of the MultiCircle or Dot object from its original range to the screen's width and height.
 
-[Add ink drops tech](https://www.youtube.com/watch?v=p7IGZTjC008)
+[Add ink drops tech:](https://www.youtube.com/watch?v=p7IGZTjC008)
 Inspired me to add ink dots as an interaction between Stage 2 and the fate element.
 
-["palette" array tech](https://github.com/remistura/p5.palette)
+["palette" array tech:](https://github.com/remistura/p5.palette)
 The palette array in code defines a set of colors that can be used for the ink drops in Stage 2, ensuring that each new ink drop gets a color from the palette in sequence. The modulo operator (%) is used to loop back to the beginning of the palette once the end is reached.
 
-[Music played speed tech](https://www.geeksforgeeks.org/p5-js-rate-function/)
+[Music played speed tech:](https://www.geeksforgeeks.org/p5-js-rate-function/)
 Music speed is controlled using the rate() function from the p5.js sound library. The speed of the music is dynamically adjusted based on the horizontal position of the mouse within the canvas during Stage 1. 
 
-[Button text in HTML tech](https://www.youtube.com/watch?v=587qclhguQg)
+[Button text in HTML tech:](https://www.youtube.com/watch?v=587qclhguQg)
 The button.html() method in the p5.js library is used to change the content (inner HTML) of an HTML element. In this context, it is used to update the text displayed on the button.
