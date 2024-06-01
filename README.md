@@ -1,7 +1,7 @@
 # jche5159_9103_tut1_Individual
 
 ## Artwork Description:
-### outline
+### Outline
 Methods: User Input
 There are three stages in this project, representing the beginning, decay and rebirth of fate. Compared with other group members, this project emphasizes user interaction to reflect the individual's control and choice of destiny. In order to express time, which is an element throughout the 3 stages, I incorporated the appearance of clocks into the group basics, and set background to be black to indicate universe.
 
