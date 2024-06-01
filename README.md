@@ -42,6 +42,7 @@ Cornfield Chase is a song composed by Hans Zimmer for Interstellar. The sense of
 ## Code Description:
 ### Class
 * **MultiCircle Class:**  
+
 -constructor(x, y, maxRadius, innerMultiCircleNum, layerNum): Initializes a new MultiCircle object with the specified coordinates, maximum radius, number of inner circles, and number of layers.
 
 -generateRandomColors(num, allowedColors = []): Generates an array of random colors, optionally from a set of allowed colors.
@@ -55,6 +56,7 @@ Cornfield Chase is a song composed by Hans Zimmer for Interstellar. The sense of
 -checkCollision(drop): Checks if the MultiCircle collides with an InkDrop.
 
 * **Dot Class:**  
+
 -constructor(x, y, z): Initializes a new Dot object with the specified coordinates and depth.
 
 -update(speed): Updates the position and depth of the dot based on a speed parameter.
@@ -64,6 +66,7 @@ Cornfield Chase is a song composed by Hans Zimmer for Interstellar. The sense of
 -checkCollision(drop): Checks if the Dot collides with an InkDrop.
 
 * **InkDrop Class:**  
+  
 -constructor(x, y, col): Initializes a new InkDrop object with the specified coordinates and color.
 
 -checkCollision(other): Checks if the InkDrop collides with another object.
